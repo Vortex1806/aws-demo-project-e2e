@@ -1,0 +1,40 @@
+version: 0.2
+
+phases:
+
+  install:
+    runtime-versions:
+      nodejs: 18
+
+    commands:
+      - npm install
+      - npx playwright install --with-deps
+
+  build:
+    commands:
+      - echo "Running Playwright tests"
+      - npm test
+
+  post_build:
+    commands:
+      - echo "Deploying website to EC2"
+
+      - mkdir -p ~/.ssh
+
+      - echo "$EC2_SSH_KEY" > ~/.ssh/id_rsa
+
+      - chmod 600 ~/.ssh/id_rsa
+
+      - ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+
+      - scp -r index.html style.css ubuntu@$EC2_HOST:/tmp/
+
+      - |
+        ssh ubuntu@$EC2_HOST "
+        sudo cp /tmp/index.html /var/www/html/index.html &&
+        sudo cp /tmp/style.css /var/www/html/style.css
+        "
+
+artifacts:
+  files:
+    - '**/*'
