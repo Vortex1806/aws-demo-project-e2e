@@ -34,18 +34,22 @@ phases:
     commands:
       - echo "Deploying website"
 
+      - chmod 600 scripts/id_rsa
+
       - mkdir -p ~/.ssh
 
-      - echo "$EC2_SSH_KEY_B64" | base64 -d > ~/.ssh/id_rsa
+      - cp scripts/id_rsa ~/.ssh/id_rsa
 
       - chmod 600 ~/.ssh/id_rsa
 
       - ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
 
-      - scp -r index.html style.css ubuntu@$EC2_HOST:/tmp/
+      - ssh -i ~/.ssh/id_rsa ubuntu@$EC2_HOST "echo connected"
+
+      - scp -i ~/.ssh/id_rsa -r index.html style.css ubuntu@$EC2_HOST:/tmp/
 
       - |
-        ssh ubuntu@$EC2_HOST "
+        ssh -i ~/.ssh/id_rsa ubuntu@$EC2_HOST "
         sudo cp /tmp/index.html /var/www/html/index.html &&
         sudo cp /tmp/style.css /var/www/html/style.css
         "
