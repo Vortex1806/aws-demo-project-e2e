@@ -1,5 +1,10 @@
 version: 0.2
 
+cache:
+  paths:
+    - 'node_modules/**/*'
+    - '/root/.cache/ms-playwright/**/*'
+
 phases:
 
   install:
@@ -7,27 +12,35 @@ phases:
       nodejs: 18
 
     commands:
-      - npm install
-      - npx playwright install --with-deps
+      - echo "Installing dependencies"
+
+      - npm ci
+
+      - |
+        if [ ! -d "/root/.cache/ms-playwright" ]; then
+          echo "Installing Playwright browsers first time"
+          npx playwright install chromium
+        else
+          echo "Playwright browsers already cached"
+        fi
 
   build:
     commands:
       - echo "Running Playwright tests"
+
       - npm test
 
   post_build:
     commands:
+      - echo "Deploying website"
+
       - mkdir -p ~/.ssh
 
-      - printf "%s" "$EC2_SSH_KEY" > ~/.ssh/id_rsa
+      - echo "$EC2_SSH_KEY_B64" | base64 -d > ~/.ssh/id_rsa
 
       - chmod 600 ~/.ssh/id_rsa
 
-      - cat ~/.ssh/id_rsa
-
       - ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
-
-      - ssh ubuntu@$EC2_HOST "echo connected"
 
       - scp -r index.html style.css ubuntu@$EC2_HOST:/tmp/
 
