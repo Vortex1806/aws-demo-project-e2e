@@ -1,0 +1,17 @@
+{
+  "name": "aws-demo-site",
+  "version": "1.0.0",
+  "description": "AWS CI/CD Demo Website",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.53.0"
+  }
+}
