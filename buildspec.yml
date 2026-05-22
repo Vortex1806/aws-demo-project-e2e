@@ -17,15 +17,17 @@ phases:
 
   post_build:
     commands:
-      - echo "Deploying website to EC2"
-
       - mkdir -p ~/.ssh
 
-      - echo "$EC2_SSH_KEY" > ~/.ssh/id_rsa
+      - printf "%s" "$EC2_SSH_KEY" > ~/.ssh/id_rsa
 
       - chmod 600 ~/.ssh/id_rsa
 
+      - cat ~/.ssh/id_rsa
+
       - ssh-keyscan -H $EC2_HOST >> ~/.ssh/known_hosts
+
+      - ssh ubuntu@$EC2_HOST "echo connected"
 
       - scp -r index.html style.css ubuntu@$EC2_HOST:/tmp/
 
