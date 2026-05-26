@@ -2,11 +2,10 @@ version: 0.2
 
 cache:
   paths:
-    - 'node_modules/**/*'
-    - '/root/.cache/ms-playwright/**/*'
+    - "node_modules/**/*"
+    - "/root/.cache/ms-playwright/**/*"
 
 phases:
-
   install:
     runtime-versions:
       nodejs: 18
@@ -32,6 +31,15 @@ phases:
 
   post_build:
     commands:
+      - echo "Generating Playwright report"
+
+      - npx playwright show-report --host 0.0.0.0 &
+      - export TIMESTAMP=$(date +%Y-%m-%d-%H-%M-%S)
+      - echo "Uploading report to S3"
+
+      - aws s3 cp playwright-report s3://aws-demo-playwright-testapp-logs/reports/$TIMESTAMP/ --recursive
+      - aws s3 cp test-results s3://aws-demo-playwright-testapp-logs/reports/$TIMESTAMP/test-results/ --recursive
+
       - echo "Deploying website"
 
       - chmod 600 scripts/id_rsa
@@ -56,4 +64,4 @@ phases:
 
 artifacts:
   files:
-    - '**/*'
+    - "**/*"
